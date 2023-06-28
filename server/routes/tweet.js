@@ -24,6 +24,6 @@ const storage = multer.diskStorage({
 const upload = multer({storage});
 
 router.post("/post_tweet", verifyToken, upload.single("picture"), postTweet);
-router.post("/reply_tweet", verifyToken, replyTweet);
+router.post("/reply_tweet", verifyToken, upload.single("picture"), replyTweet);
 
 export default router;

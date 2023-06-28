@@ -15,7 +15,7 @@ const Sidebar = () => {
         setTweetModel(false);
     }
 
-    const user_picture = user.picturePath ? user.picturePath : "fallback.png";
+    const user_picture = user.picturePath || "fallback.png";
 
     return (
         <header className="text-white py-4 h-auto">

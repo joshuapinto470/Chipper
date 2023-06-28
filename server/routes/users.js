@@ -1,7 +1,7 @@
 import express from "express";
 import {getTweet, getFeed, 
     getUser, getUserTweets, 
-    followUser, unfollowUser, likeUserPost, whoami, dislikeTweet} from "../controllers/users.js";
+    followUser, unfollowUser, likeUserPost, whoami, dislikeTweet, getBatchUsers} from "../controllers/users.js";
 import { verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -15,6 +15,7 @@ router.get("/feed", verifyToken, getFeed);
 router.get("/user_tweets/:id", verifyToken, getUserTweets);
 router.get("/tweet/:id", verifyToken, getTweet);
 
+router.post("/batch/users", verifyToken, getBatchUsers);
 router.post("/follow", verifyToken, followUser);
 router.post("/unfollow", verifyToken, unfollowUser);
 router.post("/like", verifyToken, likeUserPost);

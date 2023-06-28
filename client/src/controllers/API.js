@@ -45,7 +45,7 @@ export const likeTweetAPI = async (tweet_id, token) => {
         let data = JSON.stringify({
             "tweet_id": tweet_id
         });
-    
+
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
@@ -56,10 +56,10 @@ export const likeTweetAPI = async (tweet_id, token) => {
             },
             data: data
         };
-    
+
         const response = await axios.request(config)
         return response.data;
-        
+
     } catch (error) {
         console.error(error);
     }
@@ -70,7 +70,7 @@ export const dislikeTweetAPI = async (tweet_id, token) => {
         let data = JSON.stringify({
             "tweet_id": tweet_id
         });
-    
+
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
@@ -81,10 +81,35 @@ export const dislikeTweetAPI = async (tweet_id, token) => {
             },
             data: data
         };
-    
+
         const response = await axios.request(config)
         return response.data;
-        
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export const batchGetUsers = async (users, token) => {
+    try {
+        let data = JSON.stringify({
+            "users": users
+        });
+
+        let config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${BASE_API}/user/batch/users`,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            data: data
+        };
+
+        const response = await axios.request(config)
+        return response.data;
+
     } catch (error) {
         console.error(error);
     }

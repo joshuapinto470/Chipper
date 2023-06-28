@@ -34,9 +34,9 @@ export const whoami = async (req, res) => {
         formatted.password_digest = undefined;
         formatted.tweets = undefined;
 
-        res.status(200).json({user : formatted});
+        res.status(200).json({ user: formatted });
     } catch (error) {
-        return res.status(500).json({"Message" : "Cannot find user", code : -1});
+        return res.status(500).json({ "Message": "Cannot find user", code: -1 });
     }
 }
 
@@ -49,7 +49,7 @@ export const getFeed = async (req, res) => {
         const postFeed = await Tweet.find();
         let formattedFeed = postFeed.filter(post => post);
         formattedFeed = formattedFeed.filter(post => !post.replied_to)
-        
+
         const editedViews = formattedFeed.map((tweet) => {
             if ("views" in tweet) {
                 tweet.views += 1
@@ -82,8 +82,8 @@ export const getFeed = async (req, res) => {
         console.log(error.message);
         res.status(500).json({
             error: error.message,
-            code : -1,
-            path : req.originalUrl
+            code: -1,
+            path: req.originalUrl
         });
     }
 }
@@ -121,7 +121,7 @@ export const getUserTweets = async (req, res) => {
         // Filter out the null tweets
         user_tweets = user_tweets.filter(tweet => tweet);
         user.password_digest = undefined;
-        
+
         const formattedTweets = { "tweets": user_tweets, "user": user }
 
         res.status(200).json(formattedTweets);
@@ -218,6 +218,7 @@ export const likeUserPost = async (req, res) => {
 
         if (tweet.likes.includes(user_id)) return res.status(200).json({
             code: 1,
+            liked: true,
             message: "Tweet Already Liked"
         })
 
@@ -227,6 +228,7 @@ export const likeUserPost = async (req, res) => {
         res.status(200).json({
             code: 0,
             message: "Tweet Liked",
+            liked: true,
             tweet: tweet
         })
 
@@ -235,6 +237,7 @@ export const likeUserPost = async (req, res) => {
             error: error,
             code: -2,
             message: "Error in liking tweet",
+            liked : null,
             path: req.originalUrl
         })
     }
@@ -244,18 +247,51 @@ export const dislikeTweet = async (req, res) => {
     try {
         const { tweet_id } = req.body;
         const id = req.user.id;
-
         const tweet = await Tweet.findById(tweet_id);
 
-        if (!tweet) return res.status(500).json({type : "Cannot find tweet!"});
+        if (!tweet) return res.status(500).json({ type: "Cannot find tweet!", code : -1, liked : null});
 
         tweet.likes = tweet.likes.filter((user_id) => user_id !== id);
 
         await tweet.save();
 
-        res.status(200).json({type : "Disliked Tweet", code : 0, tweet : tweet});
+        res.status(200).json({
+            type: "Disliked Tweet",
+            code: 0,
+            liked : false,
+            tweet: tweet
+        });
 
     } catch (error) {
-        console.log("[Dislike Tweet] Error:", error)
+        res.status(500).json({
+            error: error,
+            code: -2,
+            message: "Error in disliking tweet",
+            liked : null,
+            path: req.originalUrl
+        })
+    }
+}
+
+export const getBatchUsers = async(req, res) => {
+    try {
+        const { users } = req.body;
+        const records = await User.find({ '_id': { $in: users } });
+        if (!records) res.status(500).json({code : -1, message : "Something went wrong, (Batch)"});
+
+        let formattedResponse = records.map(i => {
+            let user = i;
+            user.password_digest = undefined;
+            return user;
+        });
+
+        res.status(200).json({ users : formattedResponse});
+    } catch (error) {
+        res.status(500).json({
+            error : error,
+            code : -2,
+            message : "Error in batch user call",
+            path : req.originalUrl
+        })
     }
 }

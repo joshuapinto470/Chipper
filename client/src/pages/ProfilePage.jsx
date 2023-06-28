@@ -9,6 +9,7 @@ import ProfileCard from "../widgets/ProfileCard";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Loading from "./Loading";
 
 
 const BASE_API = import.meta.env.VITE_API_URL;
@@ -51,11 +52,7 @@ const ProfilePage = () => {
 
     }, [user_id])
 
-    if (!user) return (
-        <div className="flex justify-center items-center">
-            <p className="text-white text-3xl">Loading</p>
-        </div>
-    )
+    if (!user) return <Loading />
 
     const { Name, bio, user_handle, email, createdAt, picturePath, bannerPath, _id } = user;
     const { followers, following } = user;

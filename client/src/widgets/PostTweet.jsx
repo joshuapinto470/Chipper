@@ -12,13 +12,13 @@ const BASE_API = import.meta.env.VITE_API_URL;
 const PostTweet = () => {
     const [tweetText, setTweetText] = useState("");
     const [image, setImage] = useState(null);
-    const [uploadedImageURL, setUploadedImageURL] = useState();
-    const token = useSelector((state) => state.token);
-    const user = useSelector((state) => state.user);
-    const posts = useSelector((state) => state.posts);
+    const [uploadedImageURL, setUploadedImageURL] = useState(null);
+    const token = useSelector(state => state.token);
+    const user = useSelector(state => state.user);
+    const posts = useSelector(state => state.posts);
     const dispatch = useDispatch();
 
-    const user_profile_pic = user.picturePath ? user.picturePath : "fallback.png";
+    const user_profile_pic = user.picturePath || "fallback.png";
 
     const tweetButtonHandle = async () => {
         const tweetContent = tweetText;
@@ -96,7 +96,6 @@ const PostTweet = () => {
                         onChange={(event) => { setTweetText(event.target.value) }}
                     />
                 </div>
-
             </div>
 
             {image &&

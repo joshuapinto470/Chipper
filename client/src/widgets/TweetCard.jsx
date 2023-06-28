@@ -1,12 +1,40 @@
+import { useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { FiShare } from "react-icons/fi";
-import { HiOutlineHeart } from "react-icons/hi2"
+import { HiOutlineHeart, HiHeart } from "react-icons/hi2"
+import { useSelector } from "react-redux";
+import { dislikeTweetAPI, likeTweetAPI } from "../controllers/API";
 
 
 const BASE_API = import.meta.env.VITE_API_URL;
 
-const TweetCard = ({ content, user_name, user_handle, views, replies, date, pfp, tweet_image }) => {
-    const pfp_path = pfp ? pfp : "fallback.png";
+const TweetCard = ({ id, content, user_name, user_handle, views, replies, date, pfp, tweet_image, likes }) => {
+    const pfp_path = pfp || "fallback.png";
+    const user = useSelector(state => state.user);
+    const token = useSelector(state => state.token);
+    const [liked, setLiked] = useState(likes?.findIndex(like => like === user._id) < 0 ? false : true);
+
+    const handleLike = async () => {
+        if (liked) {
+            dislikeTweetAPI(id, token)
+              .then(res => {
+                console.log("Disliking tweet!");
+                setLiked(res?.liked);
+              })
+              .catch(err => {
+                console.log("Dislike :", err);
+              })
+          }
+          else {
+            likeTweetAPI(id, token)
+              .then(res => {
+                console.log("Liking tweet");
+                setLiked(res?.liked);
+              })
+              .catch(err => console.log(err));
+          }
+    }
+
     return (
         <div className="bg-[#15202b]">
             <div className="flex flex-shrink-0 p-4 pb-0">
@@ -33,10 +61,10 @@ const TweetCard = ({ content, user_name, user_handle, views, replies, date, pfp,
                     {content}
                 </p>
                 {
-                tweet_image &&
-                <img className="mt-2 rounded-2xl border border-gray-100 dark:border-gray-700"
-                    src={`${BASE_API}/assets/${tweet_image}`}
-                    alt="tweet image" />
+                    tweet_image &&
+                    <img className="mt-2 rounded-2xl border border-gray-100 dark:border-gray-700"
+                        src={`${BASE_API}/assets/${tweet_image}`}
+                        alt="tweet image" />
                 }
             </div>
             <div className="pl-5 mt-2 mb-2">
@@ -53,12 +81,18 @@ const TweetCard = ({ content, user_name, user_handle, views, replies, date, pfp,
 
             <hr className="border-gray-800 border-1 m-auto w-[94%]" />
 
-            <div className="pl-3 m-2">
+            <div className="pl-3 m-2 flex">
                 <p className="text-white font-bold">{replies}
                     <span className="text-base font-light p-1 text-gray-400">
                         Comments
                     </span>
                 </p>
+                <a  href="#"
+                    className="text-white font-bold ml-2">{likes?.length}
+                    <span className="text-base font-light p-1 text-gray-400">
+                        Likes
+                    </span>
+                </a>
             </div>
             <hr className="border-gray-800 border-1 m-auto w-[94%]" />
 
@@ -67,8 +101,14 @@ const TweetCard = ({ content, user_name, user_handle, views, replies, date, pfp,
                     <BiComment className="w-6 h-6 mr-2" />
                 </div>
 
-                <div id="buttons" className="text-[#71767B]   hover:text-[#F91880] transition duration-350 ease-in-out">
-                    <HiOutlineHeart className="w-6 h-6 mr-2" />
+                <div 
+                    onClick={handleLike}
+                    id="buttons" 
+                    className="text-[#71767B] hover:text-[#F91880] transition duration-350 ease-in-out">
+                    {liked ? 
+                    <HiHeart className="w-6 h-6 mr-2" color="#F91880" /> :
+                    <HiOutlineHeart className="w-6 h-6 mr-2"/>
+                    }
                 </div>
 
                 <div id="buttons" className="text-[#71767B] hover:text-blue-400 transition duration-350 ease-in-out">

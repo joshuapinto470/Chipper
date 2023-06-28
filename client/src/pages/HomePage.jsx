@@ -14,8 +14,8 @@ const API_URL = import.meta.env.VITE_API_URL + "/user/feed";
 
 
 const HomePage = () => {
-    const token = useSelector((state) => state.token);
-    const posts = useSelector((state) => state.posts);
+    const token = useSelector(state => state.token);
+    const posts = useSelector(state => state.posts);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 

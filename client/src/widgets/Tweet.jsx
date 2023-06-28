@@ -4,7 +4,8 @@ import { BiBarChart, BiComment } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { likeTweetAPI } from "../controllers/API";
+import { dislikeTweetAPI, likeTweetAPI } from "../controllers/API";
+import ReplyTweetModel from "../Models/ReplyTweetModel";
 
 const BASE_API = import.meta.env.VITE_API_URL;
 
@@ -14,7 +15,9 @@ const Tweet = ({ id, name, handle, pfp_path, createdAt, imagePath, content, like
   const token = useSelector(state => state.token);
   const user = useSelector(state => state.user);
 
-  const [liked, setLiked] = useState(likes?.findIndex((like) => like === user._id) < 0 ? false : true);
+  const [liked, setLiked] = useState(likes?.findIndex(like => like === user._id) < 0 ? false : true);
+  const [likeCount, setLikeCount] = useState(likes?.length);
+  const [showModel, setShowModel] = useState(false);
 
 
   const handleTweet = function (e) {
@@ -25,16 +28,32 @@ const Tweet = ({ id, name, handle, pfp_path, createdAt, imagePath, content, like
     navigate(`/tweet/${id}`);
   }
 
-  const handleReply = () => {
-    console.log("Reply Clicked!", id);
+  const handleLike = async () => {
+    if (liked) {
+      dislikeTweetAPI(id, token)
+        .then(res => {
+          console.log("Disliking tweet!");
+          setLiked(res?.liked);
+          setLikeCount(c => c - 1);
+        })
+        .catch(err => {
+          console.log("Dislike :", err);
+        })
+    }
+    else {
+      likeTweetAPI(id, token)
+        .then(res => {
+          console.log("Liking tweet");
+          setLiked(res?.liked);
+          if (res.code === 0)
+            setLikeCount(c => c + 1);
+        })
+        .catch(err => console.log(err));
+    }
   }
 
-  const handleLike = async () => {
-    likeTweetAPI(id, token)
-    .then((response) => {
-      setLiked(response.code >= 0 ? true : false);
-    })
-    .catch((err) => console.log(err));
+  const handleCloseModel = () => {
+    setShowModel(false);
   }
 
   return (
@@ -77,7 +96,7 @@ const Tweet = ({ id, name, handle, pfp_path, createdAt, imagePath, content, like
         }
         <div className="flex items-center py-4">
           <div id="buttons" role="button" className="flex-1 flex items-center text-[#71767B] text-xs  hover:text-blue-400 transition duration-350 ease-in-out"
-            onClick={handleReply}>
+            onClick={() => setShowModel(true)}>
             <BiComment className="w-5 h-5 mr-2" />
             {replies?.length}
           </div>
@@ -88,7 +107,7 @@ const Tweet = ({ id, name, handle, pfp_path, createdAt, imagePath, content, like
               <HiHeart color="#F91880" className="w-5 h-5 mr-2" /> :
               <HiOutlineHeart color="#F91880" className="w-5 h-5 mr-2" />
             }
-            <p>{likes?.length}</p>
+            <p>{likeCount}</p>
           </div>
 
           <div id="buttons" className="flex-1 flex items-center text-[#71767B] text-xs  hover:text-blue-400 transition duration-350 ease-in-out">
@@ -103,6 +122,11 @@ const Tweet = ({ id, name, handle, pfp_path, createdAt, imagePath, content, like
 
       </div>
 
+      <ReplyTweetModel
+        visible={showModel}
+        onClose={handleCloseModel}
+        tweet_id={id}
+      />
     </div>
   )
 }
