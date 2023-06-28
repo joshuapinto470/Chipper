@@ -8,7 +8,7 @@ export const BottomBar = () => {
     const { _id } = useSelector(state => state.user);
     return (
         <>
-            <div className="lg:hidden sticky bottom-0 left-0 z-50 w-full h-16 border-t border-gray-200 bg-[#15202b] dark:border-gray-600">
+            <div className="lg:hidden fixed overflow-hidden bottom-0 left-0 z-50 w-full h-16 border-t border-gray-200 bg-[#15202b] dark:border-gray-600">
                 <div className=" text-gray-400 grid h-full max-w-lg grid-cols-3 mx-auto">
                     <button
                         type="button"

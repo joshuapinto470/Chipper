@@ -83,14 +83,6 @@ const ProfilePage = () => {
                                 <Feed posts={user_posts} />
                                 <BottomBar />
                             </section>
-
-                            <aside className="lg:w-2/5 lg:h-12 lg:position-relative">
-                                <div className="max-w-[350px]">
-                                    <div className="overflow-y-auto fixed h-screen">
-                                        <SearchBar />
-                                    </div>
-                                </div>
-                            </aside>
                         </div>
                     </main>
                 </div>
