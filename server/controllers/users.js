@@ -140,7 +140,7 @@ export const followUser = async (req, res) => {
         const { id } = req.body; // The ID of the user whom to follow
         const user_id = req.user.id; // The ID of the current user who's following
 
-        if (id === user_id) res.status(400).json({ status: "Cannot follow self", code: -1 });
+        if (id === user_id) return res.status(400).json({ status: "Cannot follow self", code: -1 });
 
         // me is following user
         const user = await User.findById(id);
@@ -181,7 +181,7 @@ export const unfollowUser = async (req, res) => {
         const { id } = req.body; // The ID of the user whom to unfollow
         const user_id = req.user.id; // The ID of the current user who's following
 
-        if (id === user_id) res.status(400).json({ status: "Cannot unfollow self", code: -1 });
+        if (id === user_id) return res.status(400).json({ status: "Cannot unfollow self", code: -1 });
 
         // me is following user
         const user = await User.findById(id);
@@ -237,7 +237,7 @@ export const likeUserPost = async (req, res) => {
             error: error,
             code: -2,
             message: "Error in liking tweet",
-            liked : null,
+            liked: null,
             path: req.originalUrl
         })
     }
@@ -249,7 +249,7 @@ export const dislikeTweet = async (req, res) => {
         const id = req.user.id;
         const tweet = await Tweet.findById(tweet_id);
 
-        if (!tweet) return res.status(500).json({ type: "Cannot find tweet!", code : -1, liked : null});
+        if (!tweet) return res.status(500).json({ type: "Cannot find tweet!", code: -1, liked: null });
 
         tweet.likes = tweet.likes.filter((user_id) => user_id !== id);
 
@@ -258,7 +258,7 @@ export const dislikeTweet = async (req, res) => {
         res.status(200).json({
             type: "Disliked Tweet",
             code: 0,
-            liked : false,
+            liked: false,
             tweet: tweet
         });
 
@@ -267,17 +267,22 @@ export const dislikeTweet = async (req, res) => {
             error: error,
             code: -2,
             message: "Error in disliking tweet",
-            liked : null,
+            liked: null,
             path: req.originalUrl
         })
     }
 }
 
-export const getBatchUsers = async(req, res) => {
+export const getBatchUsers = async (req, res) => {
     try {
         const { users } = req.body;
         const records = await User.find({ '_id': { $in: users } });
-        if (!records) res.status(500).json({code : -1, message : "Something went wrong, (Batch)"});
+
+        if (!records) res.status(500).json({
+            code: -1,
+            message: "Something went wrong, (Batch)",
+            path: req.originalUrl
+        });
 
         let formattedResponse = records.map(i => {
             let user = i;
@@ -285,13 +290,89 @@ export const getBatchUsers = async(req, res) => {
             return user;
         });
 
-        res.status(200).json({ users : formattedResponse});
+        res.status(200).json({ users: formattedResponse });
     } catch (error) {
         res.status(500).json({
-            error : error,
-            code : -2,
-            message : "Error in batch user call",
-            path : req.originalUrl
+            error: error,
+            code: -2,
+            message: "Error in batch user call",
+            path: req.originalUrl
         })
     }
 }
+
+export const editUserProfile = async (req, res) => {
+    try {
+        const { user_name, bio, email, location } = req.body;
+        const id = req.user.id;
+
+        const user = await User.findById(id);
+        if (!user) return res.status(500).json({
+            Message: `Cannot find user with id ${id}`,
+            code: -2
+        });
+
+        const profile_image = req.files['avatar']?.[0]?.filename || null;
+        const banner_image = req.files['banner']?.[0]?.filename || null;
+
+        user.Name = user_name || user.Name;
+        user.bio = bio || user.bio;
+        user.location = location || user.location;
+        user.email = email || user.email;
+        user.picturePath = profile_image || user.picturePath;
+        user.bannerPath = banner_image || user.bannerPath;
+
+        await user.save();
+        let formattedUser = user;
+        formattedUser.password_digest = undefined;
+        // formattedUser.tweets = undefined;
+
+        res.status(200).json({ user: formattedUser })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            error: error,
+            code: -1,
+            path: req.originalUrl
+        });
+    }
+}
+
+/*
+Files :  [Object: null prototype] {
+  avatar: [
+    {
+      fieldname: 'avatar',
+      originalname: '16864709449432189357728385309809.jpg',
+      encoding: '7bit',
+      mimetype: 'image/jpeg',
+      destination: 'E:\\Documents\\WEB\\Testing\\Example\\server\\images\\',
+      filename: 'avatar-1688043691679.jpg',
+      path: 'E:\\Documents\\WEB\\Testing\\Example\\server\\images\\avatar-1688043691679.jpg',
+      size: 635701
+    }
+  ],
+  gallery: [
+    {
+      fieldname: 'gallery',
+      originalname: 'pexels-diego-tenreiro-17016108.jpg',
+      encoding: '7bit',
+      mimetype: 'image/jpeg',
+      destination: 'E:\\Documents\\WEB\\Testing\\Example\\server\\images\\',
+      filename: 'gallery-1688043691682.jpg',
+      path: 'E:\\Documents\\WEB\\Testing\\Example\\server\\images\\gallery-1688043691682.jpg',
+      size: 275729
+    },
+    {
+      fieldname: 'gallery',
+      originalname: 'SampleJPGImage_100kbmb.jpg',
+      encoding: '7bit',
+      mimetype: 'image/jpeg',
+      destination: 'E:\\Documents\\WEB\\Testing\\Example\\server\\images\\',
+      filename: 'gallery-1688043691908.jpg',
+      path: 'E:\\Documents\\WEB\\Testing\\Example\\server\\images\\gallery-1688043691908.jpg',
+      size: 102796
+    }
+  ]
+}*/

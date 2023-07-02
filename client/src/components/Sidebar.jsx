@@ -44,7 +44,7 @@ const Sidebar = () => {
                     </nav>
 
                     <div className="absolute bottom-[2rem]">
-                        <Nav Icon={<FiLogOut className="mr-4 h-6 w-6 " />} Heading="Logout" to={`/sign_up`} />
+                        <Nav Icon={<FiLogOut className="mr-4 h-6 w-6 " />} Heading="Logout" to={`/signin`} />
                         <div className="flex-shrink-0 flex hover:bg-gray-800 rounded-full px-4 py-3 mt-4 mr-2">
                             <div
                                 onClick={() => console.log("Hello")}

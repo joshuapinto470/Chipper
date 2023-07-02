@@ -3,12 +3,15 @@ import axios from 'axios';
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import EditProfileModel from '../Models/EditProfileModel';
+import { formatDate } from '../controllers/utils';
 
 const BASE_API = import.meta.env.VITE_API_URL;
 
-const ProfileCard = ({ name, bio, createdAt, 
+
+const ProfileCard = ({ name, bio, createdAt,
     location, email, handle, pfp, bannerPath, user_id, followers, following,
 }) => {
+    const date = formatDate(createdAt);
     const { _id } = useSelector(state => state.user);
     const token = useSelector(state => state.token);
     const [isFollowingUser, setIsFollowingUser] = useState(followers.includes(_id) ? true : false);
@@ -125,7 +128,7 @@ const ProfileCard = ({ name, bio, createdAt,
                                     <circle cx="12" cy="8.75" r="1.285"></circle>
                                     <circle cx="12" cy="13.156" r="1.285"></circle>
                                 </g>
-                            </svg> <span className="leading-5 ml-1">Joined December, 2019</span></span>
+                            </svg> <span className="leading-5 ml-1">{`Joined ${date}`}</span></span>
                         </div>
                     </div>
                     <div
@@ -139,8 +142,8 @@ const ProfileCard = ({ name, bio, createdAt,
             </div>
             <hr className="border-gray-800" />
             <EditProfileModel
-            visible={showModel}
-            onClose={handleCloseModel}
+                visible={showModel}
+                onClose={handleCloseModel}
             />
         </div>
     )

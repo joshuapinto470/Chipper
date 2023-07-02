@@ -45,7 +45,9 @@ const ProfilePage = () => {
                         pfp_path: post_user.picturePath,
                         bannerPath: post_user.bannerPath
                     }
-                })
+                }).sort(function(a, b) { 
+                    return new Date(b.createdAt) - new Date(a.createdAt) 
+                });
                 setUserPosts(formattedTweets)
             }).
             catch(error => console.log(error))

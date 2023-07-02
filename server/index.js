@@ -18,7 +18,7 @@ import { customAlphabet } from "nanoid";
 
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename); 
+const __dirname = path.dirname(__filename);
 
 
 dotenv.config();
@@ -28,29 +28,29 @@ const app = express();
 
 app.use(express.json());
 app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({policy : "cross-origin"}));
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("dev"));
-app.use(bodyParser.json({limit : "30mb", extended : true}));
-app.use(bodyParser.urlencoded({limit : "30mb", extended: true}));
+app.use(bodyParser.json({ limit: "30mb", extended: true }));
+app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 const storage = multer.diskStorage({
-    destination : function(req, file, cb) {
+    destination: function (req, file, cb) {
         cb(null, "public/assets");
     },
-    filename : function(req, file, cb) {
+    filename: function (req, file, cb) {
         const extension = file.originalname.split('.').pop();
-        const fileName = nanoid() + '.' +  extension;
+        const fileName = nanoid() + '.' + extension;
         req.body.profile_path = fileName;
         cb(null, fileName);
     },
 });
 
-const upload = multer({storage});
+const upload = multer({ storage });
 
 app.get("/", (req, res) => {
-    res.status(200).json({"Health": "Server running"});
+    res.status(200).json({ "Health": "OK" });
 });
 
 app.post("/auth/register", upload.single("picture"), register);
@@ -62,13 +62,13 @@ app.use("/user", userRoutes);
 app.use("/tweet", tweetRoutes);
 
 /* SERVER SETUP */
-const PORT  = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5001;
 
 mongoose.connect(process.env.MONGO_CONNECTION, {
-    useNewUrlParser : true,
-    useUnifiedTopology : true,
-})
-.then(()=>{
-    app.listen(PORT,'0.0.0.0' ,() => console.log(`server running on http://localhost:${PORT}`));
-})
-.catch((err) => console.log("Error with setup" + err));
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    })
+    .then(() => {
+        app.listen(PORT, '0.0.0.0', () => console.log(`server running on http://localhost:${PORT}`));
+    })
+    .catch(err => console.log("Error with setup" + err));

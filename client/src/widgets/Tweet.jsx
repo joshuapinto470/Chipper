@@ -10,7 +10,8 @@ import ReplyTweetModel from "../Models/ReplyTweetModel";
 const BASE_API = import.meta.env.VITE_API_URL;
 
 const Tweet = ({ id, name, handle, pfp_path, createdAt, imagePath, content, likes, views, replies, user_id }) => {
-  const date = "3h";
+  const dateOptions = {month : "short", day : "numeric"}
+  const date = new Date(createdAt).toLocaleDateString("en-IN", dateOptions);
   const navigate = useNavigate();
   const token = useSelector(state => state.token);
   const user = useSelector(state => state.user);
