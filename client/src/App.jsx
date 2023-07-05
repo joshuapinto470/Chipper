@@ -9,7 +9,7 @@ import TweetPage from "./pages/TweetPage";
 import PageNotFound from "./pages/PageNotFound";
 
 const App = () => {
-  const isAuth = useSelector((state) => state.token);
+  const isAuth = useSelector(state => state.token);
 
   return (
     <>
