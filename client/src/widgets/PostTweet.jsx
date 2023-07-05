@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setPosts } from "../state";
+import EmojiPicker from 'emoji-picker-react';
 import { AiFillCloseCircle } from "react-icons/ai";
 
 const API_URL = import.meta.env.VITE_API_URL + "/tweet/post_tweet";
@@ -12,6 +13,7 @@ const BASE_API = import.meta.env.VITE_API_URL;
 const PostTweet = () => {
     const [tweetText, setTweetText] = useState("");
     const [image, setImage] = useState(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [uploadedImageURL, setUploadedImageURL] = useState(null);
     const token = useSelector(state => state.token);
     const user = useSelector(state => state.user);
@@ -149,7 +151,8 @@ const PostTweet = () => {
                         </div>
 
                         <div className="flex-1 text-center py-2 m-2">
-                            <a href="#"
+                            <button
+                                onClick={()=> setShowEmojiPicker(!showEmojiPicker)}
                                 className="mt-1 group flex items-center text-blue-400 px-2 py-2 text-base leading-6 font-medium rounded-full hover:bg-gray-800 hover:text-blue-300">
                                 <svg className="text-center h-7 w-6" fill="none" strokeLinecap="round"
                                     strokeLinejoin="round" strokeWidth="2" stroke="currentColor"
@@ -158,7 +161,14 @@ const PostTweet = () => {
                                         d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
                                     </path>
                                 </svg>
-                            </a>
+                            </button>
+                            { showEmojiPicker && 
+                            <div className="absolute">
+                                <EmojiPicker onEmojiClick={emoji => {
+                                    setTweetText(text => text + emoji.emoji)
+                                }}/>
+                            </div>
+                            }
                         </div>
                     </div>
                 </div>
