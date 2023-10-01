@@ -40,7 +40,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        // for now except email only.. expand this to use userHandle also
+        // for now expect email only.. expand this to use userHandle also
         const { email, password} = req.body;
         const user = await User.findOne({email : email});
         console.log(req.body);

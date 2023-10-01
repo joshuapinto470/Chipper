@@ -7,6 +7,7 @@ import multer from "multer";
 import helmet from "helmet";
 import path from "path";
 import morgan from 'morgan'
+// import compression from 'compression'
 
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
@@ -27,6 +28,7 @@ const nanoid = customAlphabet('1234567890abcdef', 22)
 const app = express();
 
 app.use(express.json());
+// app.use(compression());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("dev"));
