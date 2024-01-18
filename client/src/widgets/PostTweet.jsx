@@ -24,8 +24,8 @@ const PostTweet = () => {
   const dispatch = useDispatch();
   const uploadImage = useRef();
 
-  const user_profile_pic = user.picturePath || "fallback.png";
-
+  const user_profile_pic = user.picturePath || null;
+  
   const tweetButtonHandle = async () => {
     const tweetContent = tweetText;
     if (tweetContent === "") return;
