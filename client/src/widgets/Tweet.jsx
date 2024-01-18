@@ -1,66 +1,127 @@
-import { HiOutlineHeart, HiHeart } from "react-icons/hi2"
-import { FiShare } from "react-icons/fi";
-import { BiBarChart, BiComment } from "react-icons/bi";
-import { Link, useNavigate } from "react-router-dom";
+import { Avatar, Button, Card, Tooltip } from "flowbite-react";
 import { useState } from "react";
+import { BiComment } from "react-icons/bi";
+import { FiShare } from "react-icons/fi";
+import { HiOutlineHeart, HiHeart } from "react-icons/hi2";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { dislikeTweetAPI, likeTweetAPI } from "../controllers/API";
-import ReplyTweetModel from "../Models/ReplyTweetModel";
 
 const BASE_API = import.meta.env.VITE_API_URL;
 
-const Tweet = ({ id, name, handle, pfp_path, createdAt, imagePath, content, likes, views, replies, user_id }) => {
-  const dateOptions = {month : "short", day : "numeric"}
+const Tweet = ({
+  id,
+  name,
+  handle,
+  pfp_path,
+  createdAt,
+  imagePath,
+  content,
+  likes,
+  views,
+  replies,
+  user_id,
+}) => {
+  const dateOptions = { month: "short", day: "numeric" };
   const date = new Date(createdAt).toLocaleDateString("en-IN", dateOptions);
   const navigate = useNavigate();
-  const token = useSelector(state => state.token);
-  const user = useSelector(state => state.user);
+  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user);
 
-  const [liked, setLiked] = useState(likes?.findIndex(like => like === user._id) < 0 ? false : true);
+  const [liked, setLiked] = useState(
+    likes?.findIndex((like) => like === user._id) < 0 ? false : true
+  );
   const [likeCount, setLikeCount] = useState(likes?.length);
   const [showModel, setShowModel] = useState(false);
 
-
   const handleTweet = function (e) {
-    e.preventDefault();
-    if (e.target.id === "buttons") return;
-    if (e.target.id === "name") return;
-    console.log(e.target.id)
     navigate(`/tweet/${id}`);
-  }
+  };
 
   const handleLike = async () => {
     if (liked) {
       dislikeTweetAPI(id, token)
-        .then(res => {
+        .then((res) => {
           console.log("Disliking tweet!");
           setLiked(res?.liked);
-          setLikeCount(c => c - 1);
+          setLikeCount((c) => c - 1);
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("Dislike :", err);
-        })
-    }
-    else {
+        });
+    } else {
       likeTweetAPI(id, token)
-        .then(res => {
+        .then((res) => {
           console.log("Liking tweet");
           setLiked(res?.liked);
-          if (res.code === 0)
-            setLikeCount(c => c + 1);
+          if (res.code === 0) setLikeCount((c) => c + 1);
         })
-        .catch(err => console.log(err));
+        .catch((err) => console.log(err));
     }
-  }
+  };
 
   const handleCloseModel = () => {
     setShowModel(false);
-  }
+  };
 
   return (
-    <div
-      className="bg-[#15202b] hover:bg-gray-800 transition duration-350 ease-in-out">
+    <Card className="rounded-none">
+      <div className="flex flex-col gap-1 items-start">
+        <Avatar
+          img={pfp_path ? `${BASE_API}/assets/${pfp_path}` : ""}
+          rounded
+          onClick={() => {
+            navigate(`/profile/${user_id}`);
+          }}>
+          <div className="space-y-1 font-medium dark:text-white">
+            <div>{name}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              @{handle}
+            </div>
+          </div>
+        </Avatar>
+        <p
+          className="font-normal text-gray-700 dark:text-gray-400 cursor-pointer ml-2 mt-1"
+          onClick={handleTweet}>
+          {content}
+        </p>
+        {imagePath && (
+          <div>
+            <img
+              className="mt-2 rounded-md border border-gray-100 dark:border-gray-700"
+              src={`${BASE_API}/assets/${imagePath}`}
+              alt="image"
+            />
+          </div>
+        )}
+      </div>
+      {/* <hr></hr> */}
+      <div className="flex gap-3 justify-start items-center max-w-full">
+        <Button color="gray" className="rounded-full">
+          <BiComment className="mr-2" />
+          <p>4</p>
+        </Button>
+        <Button color="gray" className="rounded-full" onClick={handleLike}>
+          {liked ? (
+            <HiHeart className="mr-2 h-4 w-4 text-red-500" />
+          ) : (
+            <HiOutlineHeart className="mr-2 h-4 w-4" />
+          )}
+          <p>{likeCount}</p>
+        </Button>
+        <Tooltip content="Share" className="ml-auto">
+          <Button color="gray" className="rounded-full">
+            <FiShare className="h-4 w-4" />
+          </Button>
+        </Tooltip>
+      </div>
+    </Card>
+  );
+};
 
+export default Tweet;
+
+/*<div className="bg-[#15202b] hover:bg-gray-800 transition duration-350 ease-in-out">
       <div id="main-title" className="flex flex-shrink-0 p-4 pb-0">
         <Link id="name" to={`/profile/${user_id}`} className="flex-shrink-0 group block">
           <div className="flex items-center">
@@ -128,8 +189,5 @@ const Tweet = ({ id, name, handle, pfp_path, createdAt, imagePath, content, like
         onClose={handleCloseModel}
         tweet_id={id}
       />
-    </div>
-  )
-}
-
-export default Tweet;
+      </div>
+*/
