@@ -8,11 +8,14 @@ export const postTweet = async (req, res) => {
             picturePath,
         } = req.body;
 
+        const isValid = content ?? picturePath;
+        if (!isValid) return res.status(400).json({"Error" : "Empty tweet"});
+
         const id = req.user.id;
-        const picture = picturePath ? picturePath[0] : null
+        const picture = picturePath ?? null
 
         const user = await User.findById(id);
-        if (!user) return res.status(404).json({ type: "something horribly went wrong" });
+        if (!user) return res.status(404).json({ type: "something went horribly wrong" });
 
         const newTweet = new Tweet({
             content,
@@ -23,7 +26,6 @@ export const postTweet = async (req, res) => {
             imagePath: picture,
             views: 0,
         });
-
 
         const savedTweet = await newTweet.save();
         user.tweets.push(savedTweet._id);
