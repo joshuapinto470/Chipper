@@ -9,7 +9,7 @@ import SignUp from "./pages/SignUp";
 import TweetPage from "./pages/TweetPage";
 
 const App = () => {
-  const isAuth = useSelector((state) => state.token);
+  const { token } = useSelector((state) => state.user);
 
   return (
     <>
@@ -17,10 +17,10 @@ const App = () => {
         <Routes>
           <Route path="*" element={<PageNotFound />} />
           <Route path="/signin" element={<Login />} />
-          <Route path="/" element={isAuth ? <HomePage /> : <Login />} />
+          <Route path="/" element={token ? <HomePage /> : <Login />} />
           <Route
             path="/home"
-            element={isAuth ? <HomePage /> : <Navigate to="/" />}
+            element={token ? <HomePage /> : <Navigate to="/" />}
           />
           <Route path="/sign_up" element={<SignUp />} />
           <Route path="/profile/:user_id" element={<ProfilePage />} />

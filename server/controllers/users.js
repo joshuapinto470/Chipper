@@ -115,7 +115,7 @@ export const getFeed = async (req, res) => {
       })
       );
       
-    console.log(formattedFeed);
+    // console.log(formattedFeed);
     await Tweet.bulkSave(editedViews);
 
     res.status(200).json(formattedFeed);

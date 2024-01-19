@@ -1,15 +1,27 @@
+import sharp from "sharp";
 import Tweet from "../models/Tweet.js";
 import User from "../models/Users.js";
+import { nanoid } from "nanoid";
 
 export const postTweet = async (req, res) => {
   try {
-    const { content, picturePath } = req.body;
+    const { content } = req.body;
+    console.log(req.body);
+
+    const buffer = req.file?.buffer || null;
+    let picture = null;
+    if (buffer) {
+      const ref = nanoid();
+      await sharp(buffer)
+        .webp({ quality: 70, nearLossless: true })
+        .toFile(`public/assets/${ref}.webp`);
+      picture = `${ref}.webp`;
+    }
 
     const isValid = content ?? picturePath;
     if (!isValid) return res.status(400).json({ Error: "Empty tweet" });
 
     const id = req.user.id;
-    const picture = picturePath ?? null;
 
     const user = await User.findById(id);
     if (!user)
@@ -31,6 +43,7 @@ export const postTweet = async (req, res) => {
 
     res.status(201).json(savedTweet);
   } catch (error) {
+    console.log(error);
     res
       .status(500)
       .json({ type: "Error creating tweet", error: error.message });

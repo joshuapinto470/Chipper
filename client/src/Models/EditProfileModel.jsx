@@ -2,7 +2,7 @@ import axios from "axios";
 import { Button, Label, Modal, TextInput, Textarea } from "flowbite-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUser } from "../state";
+import { updateUser } from "../redux/userSlice";
 
 const BASE_API = import.meta.env.VITE_API_URL;
 const API_URL = BASE_API + "/user/edit";

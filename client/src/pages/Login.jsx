@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLogin } from "../state";
+import { setLogin } from "../redux/userSlice";
 import { HiXCircle } from "react-icons/hi2";
 import { Button, Checkbox, Label, TextInput, Alert } from "flowbite-react";
 import axios from "axios";

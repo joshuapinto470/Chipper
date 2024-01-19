@@ -6,6 +6,8 @@ import { HiOutlineHeart, HiHeart } from "react-icons/hi2";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { dislikeTweetAPI, likeTweetAPI } from "../controllers/API";
+import ReplyTweetModel from "../Models/ReplyTweetModel";
+import ImageModel from "../Models/ImageModel";
 
 const BASE_API = import.meta.env.VITE_API_URL;
 
@@ -27,15 +29,25 @@ const Tweet = ({
   const navigate = useNavigate();
   const token = useSelector((state) => state.token);
   const user = useSelector((state) => state.user);
+  const [replyTweetModel, setReplyTweetModel] = useState(false);
+  const [zoomImageModel, setZoomImageModel] = useState(false);
 
   const [liked, setLiked] = useState(
     likes?.findIndex((like) => like === user._id) < 0 ? false : true
   );
+  const [image, setImage] = useState(imagePath);
   const [likeCount, setLikeCount] = useState(likes?.length);
-  const [showModel, setShowModel] = useState(false);
+
+  const onCloseZoomImageModal = () => {
+    setZoomImageModel(false);
+  };
 
   const handleTweet = function (e) {
     navigate(`/tweet/${id}`);
+  };
+
+  const closeReplyTweetModel = () => {
+    setReplyTweetModel(false);
   };
 
   const handleLike = async () => {
@@ -60,12 +72,8 @@ const Tweet = ({
     }
   };
 
-  const handleCloseModel = () => {
-    setShowModel(false);
-  };
-
   return (
-    <Card className="rounded-none">
+    <Card className="rounded-none dark:bg-black dark:border-gray-500">
       <div className="flex flex-col gap-1 items-start">
         <Avatar
           img={pfp_path ? `${BASE_API}/assets/${pfp_path}` : ""}
@@ -73,9 +81,9 @@ const Tweet = ({
           onClick={() => {
             navigate(`/profile/${user_id}`);
           }}>
-          <div className="space-y-1 font-medium dark:text-white">
+          <div className="font-medium">
             <div>{name}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
               @{handle}
             </div>
           </div>
@@ -85,21 +93,26 @@ const Tweet = ({
           onClick={handleTweet}>
           {content}
         </p>
-        {imagePath && (
+        {image && (
           <div>
             <img
               className="mt-2 rounded-md border border-gray-100 dark:border-gray-700"
               src={`${BASE_API}/assets/${imagePath}`}
+              onError={(error) => setImage(null)}
+              onClick={() => setZoomImageModel(true)}
               alt="image"
             />
           </div>
         )}
       </div>
       {/* <hr></hr> */}
-      <div className="flex gap-3 justify-start items-center max-w-full">
-        <Button color="gray" className="rounded-full">
+      <div className="flex gap-3 justify-between sm:justify-start items-center max-w-full">
+        <Button
+          color="gray"
+          className="rounded-full"
+          onClick={() => setReplyTweetModel(true)}>
           <BiComment className="mr-2" />
-          <p>4</p>
+          <p>{replies?.length}</p>
         </Button>
         <Button color="gray" className="rounded-full" onClick={handleLike}>
           {liked ? (
@@ -115,79 +128,19 @@ const Tweet = ({
           </Button>
         </Tooltip>
       </div>
+      <ReplyTweetModel
+        visible={replyTweetModel}
+        onClose={closeReplyTweetModel}
+        tweet_id={id}
+        tweet={{ name, content, pfp_path, handle }}
+      />
+      <ImageModel
+        visible={zoomImageModel}
+        onClose={onCloseZoomImageModal}
+        image_url={`${BASE_API}/assets/${imagePath}`}
+      />
     </Card>
   );
 };
 
 export default Tweet;
-
-/*<div className="bg-[#15202b] hover:bg-gray-800 transition duration-350 ease-in-out">
-      <div id="main-title" className="flex flex-shrink-0 p-4 pb-0">
-        <Link id="name" to={`/profile/${user_id}`} className="flex-shrink-0 group block">
-          <div className="flex items-center">
-            <div>
-              <img className="inline-block h-10 w-10 rounded-full"
-                onClick={handleTweet}
-                src={pfp_path ? `${BASE_API}/assets/${pfp_path}` : `${BASE_API}/assets/fallback.png`}
-                alt="" />
-            </div>
-            <div className="ml-3">
-              <p className="text-base leading-6 font-medium text-white">
-                {name}
-                <span className="text-base leading-5 font-light p-1 text-gray-400 group-hover:text-gray-300 transition ease-in-out duration-150">
-                  @{handle}
-                </span>
-                <span className="text-base leading-5 font-light p-1 text-gray-400 group-hover:text-gray-300 transition ease-in-out duration-150">
-                  {date}
-                </span>
-              </p>
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      <div className="pl-16">
-        <p className="text-base width-auto font-normal text-white flex-shrink mr-2.5">
-          {content}
-        </p>
-        {
-          imagePath &&
-          <img className="mt-2 rounded-2xl border border-gray-100 dark:border-gray-700"
-            src={`${BASE_API}/assets/${imagePath}`}
-            alt="tweet image" />
-        }
-        <div className="flex items-center py-4">
-          <div id="buttons" role="button" className="flex-1 flex items-center text-[#71767B] text-xs  hover:text-blue-400 transition duration-350 ease-in-out"
-            onClick={() => setShowModel(true)}>
-            <BiComment className="w-5 h-5 mr-2" />
-            {replies?.length}
-          </div>
-
-          <div id="buttons" className="flex-1 flex items-center text-white text-xs  hover:text-[#F91880] transition duration-350 ease-in-out"
-            onClick={handleLike}>
-            {liked ?
-              <HiHeart color="#F91880" className="w-5 h-5 mr-2" /> :
-              <HiOutlineHeart color="#F91880" className="w-5 h-5 mr-2" />
-            }
-            <p>{likeCount}</p>
-          </div>
-
-          <div id="buttons" className="flex-1 flex items-center text-[#71767B] text-xs  hover:text-blue-400 transition duration-350 ease-in-out">
-            <BiBarChart className="w-5 h-5 mr-2" />
-            {views}
-          </div>
-
-          <div id="buttons" className="flex-1 flex items-center text-[#71767B] text-xs  hover:text-blue-400 transition duration-350 ease-in-out">
-            <FiShare className="w-5 h-5 mr-2" />
-          </div>
-        </div>
-
-      </div>
-
-      <ReplyTweetModel
-        visible={showModel}
-        onClose={handleCloseModel}
-        tweet_id={id}
-      />
-      </div>
-*/

@@ -1,168 +1,198 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AiOutlineClose, AiFillCloseCircle } from "react-icons/ai"
-import { setPosts } from "../state";
 import axios from "axios";
+import { Avatar, Button, Textarea, Modal } from "flowbite-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  HiOutlineFaceSmile,
+  HiOutlineXMark,
+  HiPlayCircle,
+} from "react-icons/hi2";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { PiImage } from "react-icons/pi";
 
 const BASE_API = import.meta.env.VITE_API_URL;
 const API_URL = BASE_API + "/tweet/reply_tweet";
 
-const ReplyTweetModel = ({ visible, onClose, tweet_id }) => {
-    const [tweetText, setTweetText] = useState(null);
-    const [uploadedImageURL, setUploadedImageURL] = useState(null);
-    const [image, setImage] = useState(null);
-    const token = useSelector(state => state.token);
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+const ReplyTweetModel = ({ visible, onClose, tweet_id, tweet }) => {
+  const [tweetText, setTweetText] = useState("");
+  const [uploadedImageURL, setUploadedImageURL] = useState(null);
+  const [image, setImage] = useState(null);
+  const { token, user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const tweetInputRef = useRef(null);
+  const uploadImage = useRef();
+  const profile_pic = user.picturePath || null;
 
-    if (!visible) return null;
+  if (!visible) return null;
 
-    const handleOnClose = (e) => {
-        if (e.target.id === "container") onClose();
+  const handleOnClose = (e) => {
+    onClose();
+  };
+
+  const handlePostTweet = async () => {
+    const tweetContent = tweetText;
+    if (!tweetContent) return;
+    if (tweetContent === "") return;
+    const formData = new FormData();
+    formData.append("content", tweetContent);
+    formData.append("tweet_id", tweet_id);
+    if (image) {
+      formData.append("picture", image);
+    }
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: API_URL,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: formData,
     };
 
-
-    const handlePostTweet = async () => {
-        const tweetContent = tweetText;
-        if (!tweetContent) return;
-        if (tweetContent === "") return;
-        const formData = new FormData();
-        formData.append("content", tweetContent);
-        formData.append("tweet_id", tweet_id)
-        if (image) {
-            formData.append("picture", image);
-            formData.append("picturePath", image.name);
-        }
-
-        let config = {
-            method: 'post',
-            maxBodyLength: Infinity,
-            url: API_URL,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            data: formData
-        };
-
-        axios.request(config)
-            .then(response => {
-                setTweetText(null);
-                setImage(null);
-
-                navigate(`/tweet/${tweet_id}`)
-                onClose();
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-
-    const handleImageUpload = async (e) => {
-        console.log(e.target.files);
-        if (e.target.files) {
-            setImage(e.target.files[0]);
-            setUploadedImageURL(URL.createObjectURL(e.target.files[0]));
-        }
-    }
-
-    const closeImage = () => {
+    axios
+      .request(config)
+      .then((response) => {
+        setTweetText("");
         setImage(null);
-        setUploadedImageURL(null);
+
+        navigate(`/tweet/${tweet_id}`);
+        onClose();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleImageUpload = async (e) => {
+    console.log(e.target.files);
+    if (e.target.files) {
+      setImage(e.target.files[0]);
+      setUploadedImageURL(URL.createObjectURL(e.target.files[0]));
     }
+  };
 
-    return (
-        <div
-            id="container"
-            onClick={handleOnClose}
-            className='fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center'>
+  const closeImage = () => {
+    setImage(null);
+    setUploadedImageURL(null);
+  };
 
-            <div className="bg-[#15202b] p-2 rounded-xl flex flex-col">
-                <div className="">
-                    <button
-                        onClick={onClose}
-                        className='hover:bg-gray-800 mt-1 py-2 px-4 rounded-full m-auto'>
-                        <AiOutlineClose fill="white" />
-                    </button>
-                </div>
-
-                <div className="flex flex-col bg-[#15202b]">
-                    <div className="flex">
-                        <div className="m-2 w-10 py-1">
-                            <img className="inline-block h-10 w-10 rounded-full"
-                                src={`${BASE_API}/assets/fallback.png`}
-                                alt="" />
-                        </div>
-                        <div className="flex-1 px-2 pt-2 mt-2">
-                            <textarea
-                                onChange={(event) => { setTweetText(event.target.value) }}
-                                className="bg-transparent text-gray-400 font-medium text-lg w-full"
-                                rows="4"
-                                cols="50"
-                                maxLength={280}
-                                placeholder="What's happening?"
-                            />
-                        </div>
-                    </div>
-
-                    {image &&
-                        <div className="flex bg-cover bg-no-repeat bg-center rounded-lg relative justify-center">
-                            <img className=" mt-2 mb-2 rounded-2xl border border-gray-100 dark:border-gray-700 max-w-[500px]"
-                                src={uploadedImageURL}
-                                alt="" />
-                            <button
-                                onClick={closeImage}
-                                className="text-[30px] absolute top-2/4 left-2/4 transform-[-50%]">
-                                <AiFillCloseCircle fill="#FFDD00" color="black" />
-                            </button>
-                        </div>
-                    }
-
-                    <hr className="border-gray-800 border-1"></hr>
-                    <div className="flex mt-1">
-
-                        <div className="text-center px-1 py-1 m-1">
-                            <input type="file" accept="image/*" className="hidden" id="attachment" onChange={handleImageUpload} />
-                            <button
-                                onClick={() => { document.getElementById("attachment").click() }}
-                                className="mt-1 group flex items-center text-blue-400 px-2 py-2 text-base leading-6 font-medium rounded-full hover:bg-gray-800 hover:text-blue-300">
-                                <svg className="text-center h-7 w-6" fill="none" strokeLinecap="round"
-                                    strokeLinejoin="round" strokeWidth="2" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="flex px-1 py-1 m-1">
-                            <input type="file" accept="image/*" className="hidden" id="attachment" />
-                            <button
-                                className="mt-1 group flex items-center text-blue-400 px-2 py-2 text-base leading-6 font-medium rounded-full hover:bg-gray-800 hover:text-blue-300">
-                                <svg className="text-center h-7 w-6" fill="none" strokeLinecap="round"
-                                    strokeLinejoin="round" strokeWidth="2" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
-                                    </path>
-                                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <button
-                            onClick={handlePostTweet}
-                            className="bg-blue-400 hover:bg-blue-500 mt-5 active:bg-[#1d9bf0] text-white font-bold rounded-full float-right mr-8 py-2 px-4 m-auto">
-                            Tweet
-                        </button>
-                    </div>
-                </div>
+  return (
+    <Modal
+      dismissible
+      show={visible}
+      initialFocus={tweetInputRef}
+      size="lg"
+      onClose={handleOnClose}
+      popup>
+      <Modal.Header />
+      <Modal.Body>
+        <div className="flex mb-2 gap-1">
+          <div className="flex flex-col min-w-10">
+            <Avatar
+              img={
+                tweet.pfp_path ? `${BASE_API}/assets/${tweet.pfp_path}` : null
+              }
+            />
+            <div className="flex-grow">
+              <svg viewBox="0 0 100 100">
+                <line x1="50" y1="0" x2="50" y2="100" stroke="black" />
+              </svg>
             </div>
+          </div>
+          <div className=" flex flex-col gap-1 ml-2">
+            <div className="flex gap-1">
+              <p className="font-bold">{tweet.name}</p>
+              <span className="font-thin">@{tweet.handle}</span>
+            </div>
+            <div>
+              <p>{tweet.content}</p>
+            </div>
+            <div>
+              <p className="text-blue-600">
+                <span className="text-slate-500 mr-1">Replying to</span>@
+                {tweet.handle}
+              </p>
+            </div>
+          </div>
         </div>
-    )
-}
+        <div className="flex gap-2">
+          <div className="hidden sm:block">
+            <Avatar
+              img={
+                user.picturePath ? `${BASE_API}/assets/${profile_pic}` : null
+              }
+              alt="avatar"
+              rounded
+            />
+          </div>
+          <div className="flex-grow">
+            <Textarea
+              ref={tweetInputRef}
+              id="comment"
+              placeholder="Post your reply"
+              className="max-w-full resize-none  bg-white dark:bg-gray-900"
+              required
+              value={tweetText}
+              rows={3}
+              maxLength={280}
+              onChange={(e) => setTweetText(e.target.value)}
+            />
 
-export default ReplyTweetModel
+            {image && (
+              <div className="relative">
+                <Button
+                  color="gray"
+                  className="absolute top-4 left-2"
+                  onClick={closeImage}>
+                  <HiOutlineXMark className="h-5 w-5" />
+                </Button>
+                <img
+                  className="mt-2 rounded-2xl border border-gray-100 dark:border-gray-700 block "
+                  src={uploadedImageURL}
+                  alt="uploaded image"
+                />
+              </div>
+            )}
+
+            <hr className="mt-2"></hr>
+
+            <div className="flex justify-between mt-2">
+              <div className="flex gap-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={uploadImage}
+                  onChange={handleImageUpload}
+                />
+                <Button
+                  color="gray"
+                  className="rounded-full"
+                  onClick={() => uploadImage.current.click()}>
+                  <PiImage className="h-5 w-5" />
+                </Button>
+                <Button color="gray" className="rounded-full">
+                  <HiPlayCircle className="h-5 w-5" />
+                </Button>
+                <Button color="gray" className="rounded-full">
+                  <HiOutlineFaceSmile className="h-5 w-5" />
+                </Button>
+              </div>
+              <Button
+                disabled={tweetText.length === 0}
+                onClick={handlePostTweet}>
+                Tweet
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal.Body>
+    </Modal>
+  );
+};
+
+export default ReplyTweetModel;

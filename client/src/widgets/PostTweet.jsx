@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Avatar, Button, Card, Progress, Textarea } from "flowbite-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   HiOutlineFaceSmile,
   HiPlayCircle,
@@ -8,7 +8,7 @@ import {
 } from "react-icons/hi2";
 import { PiImage } from "react-icons/pi";
 import { useDispatch, useSelector } from "react-redux";
-import { setPosts } from "../state";
+import { setPosts } from "../redux/userSlice";
 
 const API_URL = import.meta.env.VITE_API_URL + "/tweet/post_tweet";
 const BASE_API = import.meta.env.VITE_API_URL;
@@ -16,16 +16,30 @@ const BASE_API = import.meta.env.VITE_API_URL;
 const PostTweet = () => {
   const [tweetText, setTweetText] = useState("");
   const [image, setImage] = useState(null);
+  const [avatar, setAvatar] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [uploadedImageURL, setUploadedImageURL] = useState(null);
-  const token = useSelector((state) => state.token);
-  const user = useSelector((state) => state.user);
-  const posts = useSelector((state) => state.posts);
+  const { token, user, posts } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const uploadImage = useRef();
 
-  const user_profile_pic = user.picturePath || null;
-  
+  useEffect(() => {
+    const getAvatar = async () => {
+      try {
+        const res = await fetch(`${BASE_API}/assets/${user.picturePath}`);
+        if (!res.ok) {
+          setAvatar(null);
+          return;
+        }
+        const data = await res.blob();
+        setAvatar(URL.createObjectURL(data));
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getAvatar();
+  }, [user.picturePath]);
+
   const tweetButtonHandle = async () => {
     const tweetContent = tweetText;
     if (tweetContent === "") return;
@@ -33,7 +47,6 @@ const PostTweet = () => {
     formData.append("content", tweetContent);
     if (image) {
       formData.append("picture", image);
-      formData.append("picturePath", image.name);
     }
 
     axios({
@@ -90,14 +103,12 @@ const PostTweet = () => {
   };
 
   return (
-    <Card className="max-w-full rounded-none">
+    <Card className="max-w-full rounded-none hidden sm:block border-none dark:bg-black dark:border-none">
       <div className="flex flex-col items-start gap-2">
-        <Avatar
-          img={user.picturePath ? `${BASE_API}/assets/${user_profile_pic}` : ""}
-          rounded>
-          <div className="space-y-1 font-medium dark:text-white">
+        <Avatar img={avatar || null} rounded>
+          <div className="font-medium dark:text-white">
             <div>{user.Name}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm font-thin text-gray-500 dark:text-gray-400">
               @{user.user_handle}
             </div>
           </div>
@@ -105,7 +116,7 @@ const PostTweet = () => {
         <Textarea
           id="comment"
           placeholder="What's happening?"
-          className="mx-auto max-w-full resize-none"
+          className="mx-auto max-w-full resize-none dark:bg-gray-900 bg-slate-50 rounded-md"
           required
           value={tweetText}
           rows={image ? 2 : 4}

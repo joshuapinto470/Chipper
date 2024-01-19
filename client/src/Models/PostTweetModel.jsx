@@ -3,8 +3,12 @@ import axios from "axios";
 import { Avatar, Modal, Textarea, Button } from "flowbite-react";
 import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPosts } from "../state";
-import { HiOutlineFaceSmile, HiPlayCircle } from "react-icons/hi2";
+import { setPosts } from "../redux/userSlice";
+import {
+  HiOutlineFaceSmile,
+  HiPlayCircle,
+  HiOutlineXMark,
+} from "react-icons/hi2";
 import { PiImage } from "react-icons/pi";
 
 const BASE_API = import.meta.env.VITE_API_URL;
@@ -14,10 +18,9 @@ const PostTweetModel = ({ visible, onClose }) => {
   const [tweetText, setTweetText] = useState("");
   const [uploadedImageURL, setUploadedImageURL] = useState(null);
   const [image, setImage] = useState(null);
-  const token = useSelector((state) => state.token);
-  const user = useSelector((state) => state.user);
-  const posts = useSelector((state) => state.posts);
+  const {token, user, posts} = useSelector((state) => state.user)
   const tweetInputRef = useRef(null);
+  const uploadImage = useRef();
   const dispatch = useDispatch();
 
   const profile_pic = user.picturePath || "fallback.png";
@@ -37,7 +40,6 @@ const PostTweetModel = ({ visible, onClose }) => {
     formData.append("content", tweetContent);
     if (image) {
       formData.append("picture", image);
-      formData.append("picturePath", image.name);
     }
 
     axios({
@@ -50,7 +52,7 @@ const PostTweetModel = ({ visible, onClose }) => {
       },
     })
       .then((res) => {
-        setTweetText(null);
+        setTweetText("");
         setImage(null);
         const new_id = res.data._id;
         delete res.data._id;
@@ -104,9 +106,11 @@ const PostTweetModel = ({ visible, onClose }) => {
       <Modal.Header />
       <Modal.Body>
         <div className="flex gap-2">
-          <div>
+          <div className="hidden sm:block">
             <Avatar
-              img={user.picturePath ? `${BASE_API}/assets/${profile_pic}` : null}
+              img={
+                user.picturePath ? `${BASE_API}/assets/${profile_pic}` : null
+              }
               alt="avatar"
               rounded
             />
@@ -116,19 +120,45 @@ const PostTweetModel = ({ visible, onClose }) => {
               ref={tweetInputRef}
               id="comment"
               placeholder="What is happening?!"
-              className="max-w-full resize-none"
+              className="max-w-full resize-none dark:bg-gray-900"
               required
               value={tweetText}
-              rows={4}
+              rows={3}
               maxLength={280}
               onChange={(e) => setTweetText(e.target.value)}
             />
+
+            {image && (
+              <div className="relative">
+                <Button
+                  color="gray"
+                  className="absolute top-4 left-2 rounded-full"
+                  onClick={closeImage}>
+                  <HiOutlineXMark className="h-4 w-4" />
+                </Button>
+                <img
+                  className="mt-2 rounded-2xl border border-gray-100 dark:border-gray-700 block "
+                  src={uploadedImageURL}
+                  alt="uploaded image"
+                />
+              </div>
+            )}
 
             <hr className="mt-2"></hr>
 
             <div className="flex justify-between mt-2">
               <div className="flex gap-1">
-                <Button color="gray" className="rounded-full">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={uploadImage}
+                  onChange={handleImageUpload}
+                />
+                <Button
+                  color="gray"
+                  className="rounded-full"
+                  onClick={() => uploadImage.current.click()}>
                   <PiImage className="h-5 w-5" />
                 </Button>
                 <Button color="gray" className="rounded-full">

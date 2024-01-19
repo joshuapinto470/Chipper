@@ -6,7 +6,7 @@ const Nav = ({ Icon, Heading, to }) => {
     return (
         <Link 
             to={to}
-            className="mt-1 group flex items-center px-5 py-5 text-base leading-6 font-semibold rounded-md hover:shadow-md hover:text-blue-500">
+            className="mt-1 group flex items-center px-5 py-5 text-base leading-6 font-semibold rounded-lg shadow-custom hover:text-blue-500">
             {Icon}
             {Heading}
         </Link>

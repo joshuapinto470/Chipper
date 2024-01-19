@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Feed from "../components/Feed";
 import Sidebar from "../components/Sidebar";
-import { setLogout, setPosts, updatePostUpdateTime } from "../state";
+import { setLogout, setPosts, updatePostUpdateTime } from "../redux/userSlice";
 import { BottomBar } from "../widgets/BottomBar";
 import HomeHeader from "../widgets/HomeHeader";
 import PostTweet from "../widgets/PostTweet";
@@ -13,8 +13,7 @@ import SearchBar from "../widgets/SearchBar";
 const API_URL = import.meta.env.VITE_API_URL + "/user/feed";
 
 const HomePage = () => {
-  const token = useSelector((state) => state.token);
-  const posts = useSelector((state) => state.posts);
+  const {token, posts} = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -29,7 +28,6 @@ const HomePage = () => {
           return new Date(a.createdAt) - new Date(b.createdAt);
         });
         _posts.reverse();
-        console.log(_posts)
         dispatch(
           setPosts({
             posts: _posts,

@@ -21,10 +21,10 @@ const ProfileCard = ({
   following,
 }) => {
   const date = formatDate(createdAt);
-  const { _id } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const [isFollowingUser, setIsFollowingUser] = useState(
-    followers.includes(_id) ? true : false
+    followers.includes(user._id) ? true : false
   );
   const profile_link = pfp ? pfp : "fallback.png";
   const banner = bannerPath ? bannerPath : "BannerFallback.png";
@@ -93,7 +93,7 @@ const ProfileCard = ({
           </div>
 
           <div className="flex flex-col text-right">
-            {user_id === _id ? (
+            {user_id === user._id ? (
               <button
                 onClick={() => setShowModel(true)}
                 className="flex justify-center  max-h-max whitespace-nowrap focus:outline-none 

@@ -17,7 +17,7 @@ const API_URL = import.meta.env.VITE_API_URL + "/user/get_user/";
 const ProfilePage = () => {
   const { user_id } = useParams();
 
-  const token = useSelector((state) => state.token);
+  const { token } = useSelector((state) => state.user);
   const [user, setUser] = useState();
   const [user_posts, setUserPosts] = useState();
 
@@ -33,7 +33,7 @@ const ProfilePage = () => {
       .catch((err) => {
         console.log(err);
         setUser(null);
-        setUserPosts(null)
+        setUserPosts(null);
         return;
       });
 
@@ -60,11 +60,10 @@ const ProfilePage = () => {
       })
       .catch((error) => {
         setUser(null);
-        setUserPosts(null)
+        setUserPosts(null);
       });
   }, [user_id]);
 
-  console.log('Before render: ' + user)
   if (!user) return <PageNotFound />;
 
   const {
@@ -89,7 +88,7 @@ const ProfilePage = () => {
           <main role="main">
             <div className="lg:flex lg:w-[990px]">
               <section className="lg:w-3/5 lg:border lg:border-y-0 lg:max-w-[600px]">
-                <HomeHeader />
+                {/* <HomeHeader /> */}
                 <hr></hr>
                 <ProfileCard
                   name={Name}

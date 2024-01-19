@@ -16,10 +16,10 @@ const Feed = ({ posts }) => {
 
   return (
     <ul className="list-none">
-      <li>
-        {posts.map((post) => {
-          return (
-            <div key={post.id}>
+      {posts.map((post) => {
+        return (
+          <li key={post._id}>
+            <div>
               <Tweet
                 id={post.id ? post.id : post._id}
                 name={post.name}
@@ -34,9 +34,9 @@ const Feed = ({ posts }) => {
                 user_id={post.user_id}
               />
             </div>
-          );
-        })}
-      </li>
+          </li>
+        );
+      })}
     </ul>
   );
 };

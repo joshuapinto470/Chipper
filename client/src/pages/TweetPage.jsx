@@ -19,7 +19,7 @@ import PageNotFound from "./PageNotFound.jsx";
 
 const TweetPage = () => {
   const { tweet_id } = useParams();
-  const token = useSelector((state) => state.token);
+  const { token } = useSelector((state) => state.user);
   const [posts, setPosts] = useState(null);
   const [tweet, setTweet] = useState();
   const [user, setUser] = useState();
