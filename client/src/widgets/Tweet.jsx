@@ -1,42 +1,28 @@
 import { Avatar, Button, Card, Tooltip } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BiComment } from "react-icons/bi";
 import { FiShare } from "react-icons/fi";
-import { HiOutlineHeart, HiHeart } from "react-icons/hi2";
+import { HiHeart, HiOutlineHeart } from "react-icons/hi2";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { dislikeTweetAPI, likeTweetAPI } from "../controllers/API";
-import ReplyTweetModel from "../Models/ReplyTweetModel";
 import ImageModel from "../Models/ImageModel";
+import ReplyTweetModel from "../Models/ReplyTweetModel";
 
 const BASE_API = import.meta.env.VITE_API_URL;
 
-const Tweet = ({
-  id,
-  name,
-  handle,
-  pfp_path,
-  createdAt,
-  imagePath,
-  content,
-  likes,
-  views,
-  replies,
-  user_id,
-}) => {
-  const dateOptions = { month: "short", day: "numeric" };
-  const date = new Date(createdAt).toLocaleDateString("en-IN", dateOptions);
+const Tweet = ({ id, post }) => {
+  // const dateOptions = { month: "short", day: "numeric" };
+  // const date = new Date(createdAt).toLocaleDateString("en-IN", dateOptions);
   const navigate = useNavigate();
-  const token = useSelector((state) => state.token);
-  const user = useSelector((state) => state.user);
+  const { token, user } = useSelector((state) => state.user);
+
   const [replyTweetModel, setReplyTweetModel] = useState(false);
   const [zoomImageModel, setZoomImageModel] = useState(false);
-
+  const [avatar, setAvatar] = useState(null);
   const [liked, setLiked] = useState(
-    likes?.findIndex((like) => like === user._id) < 0 ? false : true
+    post.likes?.findIndex((like) => like === user._id) < 0 ? false : true
   );
-  const [image, setImage] = useState(imagePath);
-  const [likeCount, setLikeCount] = useState(likes?.length);
+  const [likeCount, setLikeCount] = useState(post.likes?.length);
 
   const onCloseZoomImageModal = () => {
     setZoomImageModel(false);
@@ -50,25 +36,44 @@ const Tweet = ({
     setReplyTweetModel(false);
   };
 
-  const handleLike = async () => {
-    if (liked) {
-      dislikeTweetAPI(id, token)
-        .then((res) => {
-          console.log("Disliking tweet!");
-          setLiked(res?.liked);
-          setLikeCount((c) => c - 1);
-        })
-        .catch((err) => {
-          console.log("Dislike :", err);
-        });
-    } else {
-      likeTweetAPI(id, token)
-        .then((res) => {
-          console.log("Liking tweet");
-          setLiked(res?.liked);
-          if (res.code === 0) setLikeCount((c) => c + 1);
-        })
-        .catch((err) => console.log(err));
+  useEffect(() => {
+    const getAvatar = async () => {
+      try {
+        const res = await fetch(`${BASE_API}/assets/${post.pfp_path}`);
+        if (!res.ok) {
+          setAvatar(null);
+          return;
+        }
+        const data = await res.blob();
+        setAvatar(URL.createObjectURL(data));
+      } catch (error) {
+        console.log("Err: " + error.message);
+      }
+    };
+    getAvatar();
+  }, [post.pfp_path]);
+
+  const LikeTweet = async () => {
+    try {
+      const res = await fetch(
+        `${BASE_API}/user/${liked ? "dislike" : "like"}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ tweet_id: id }),
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Error liking tweet");
+      }
+      const data = await res.json();
+      setLiked(data.liked);
+      setLikeCount((c) => (liked ? --c : ++c));
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -76,29 +81,29 @@ const Tweet = ({
     <Card className="rounded-none dark:bg-black dark:border-gray-500">
       <div className="flex flex-col gap-1 items-start">
         <Avatar
-          img={pfp_path ? `${BASE_API}/assets/${pfp_path}` : ""}
+          img={avatar || null}
           rounded
           onClick={() => {
-            navigate(`/profile/${user_id}`);
+            navigate(`/profile/${post.user_id}`);
           }}>
           <div className="font-medium">
-            <div>{name}</div>
+            <div>{post.name}</div>
             <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              @{handle}
+              @{post.handle}
             </div>
           </div>
         </Avatar>
         <p
           className="font-normal text-gray-700 dark:text-gray-400 cursor-pointer ml-2 mt-1"
           onClick={handleTweet}>
-          {content}
+          {post.content}
         </p>
-        {image && (
+        {post.imagePath && (
           <div>
             <img
               className="mt-2 rounded-md border border-gray-100 dark:border-gray-700"
-              src={`${BASE_API}/assets/${imagePath}`}
-              onError={(error) => setImage(null)}
+              src={`${BASE_API}/assets/${post.imagePath}`}
+              // onError={(error) => setImage(null)}
               onClick={() => setZoomImageModel(true)}
               alt="image"
             />
@@ -112,9 +117,9 @@ const Tweet = ({
           className="rounded-full"
           onClick={() => setReplyTweetModel(true)}>
           <BiComment className="mr-2" />
-          <p>{replies?.length}</p>
+          <p>{post.replies?.length}</p>
         </Button>
-        <Button color="gray" className="rounded-full" onClick={handleLike}>
+        <Button color="gray" className="rounded-full" onClick={LikeTweet}>
           {liked ? (
             <HiHeart className="mr-2 h-4 w-4 text-red-500" />
           ) : (
@@ -132,12 +137,17 @@ const Tweet = ({
         visible={replyTweetModel}
         onClose={closeReplyTweetModel}
         tweet_id={id}
-        tweet={{ name, content, pfp_path, handle }}
+        tweet={{
+          name: post.name,
+          content: post.content,
+          pfp_path: post.pfp_path,
+          handle: post.handle,
+        }}
       />
       <ImageModel
         visible={zoomImageModel}
         onClose={onCloseZoomImageModal}
-        image_url={`${BASE_API}/assets/${imagePath}`}
+        image_url={`${BASE_API}/assets/${post.imagePath}`}
       />
     </Card>
   );

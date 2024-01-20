@@ -22,16 +22,7 @@ const Feed = ({ posts }) => {
             <div>
               <Tweet
                 id={post.id ? post.id : post._id}
-                name={post.name}
-                handle={post.handle}
-                imagePath={post.imagePath}
-                content={post.content}
-                pfp_path={post.pfp_path}
-                createdAt={post.createdAt}
-                likes={post.likes}
-                views={post.views}
-                replies={post.replies}
-                user_id={post.user_id}
+                post={post}
               />
             </div>
           </li>

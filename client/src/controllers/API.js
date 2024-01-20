@@ -48,7 +48,6 @@ export const likeTweetAPI = async (tweet_id, token) => {
 
         let config = {
             method: 'post',
-            maxBodyLength: Infinity,
             url: `${BASE_API}/user/like`,
             headers: {
                 'Content-Type': 'application/json',
@@ -73,7 +72,6 @@ export const dislikeTweetAPI = async (tweet_id, token) => {
 
         let config = {
             method: 'post',
-            maxBodyLength: Infinity,
             url: `${BASE_API}/user/dislike`,
             headers: {
                 'Content-Type': 'application/json',

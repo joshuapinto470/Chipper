@@ -13,7 +13,7 @@ export const postTweet = async (req, res) => {
     if (buffer) {
       const ref = nanoid();
       await sharp(buffer)
-        .webp({ quality: 70, nearLossless: true })
+        .webp({ quality: 60})
         .toFile(`public/assets/${ref}.webp`);
       picture = `${ref}.webp`;
     }

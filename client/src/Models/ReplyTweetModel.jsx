@@ -87,7 +87,8 @@ const ReplyTweetModel = ({ visible, onClose, tweet_id, tweet }) => {
       initialFocus={tweetInputRef}
       size="lg"
       onClose={handleOnClose}
-      popup>
+      popup
+    >
       <Modal.Header />
       <Modal.Body>
         <div className="flex mb-2 gap-1">
@@ -147,7 +148,8 @@ const ReplyTweetModel = ({ visible, onClose, tweet_id, tweet }) => {
                 <Button
                   color="gray"
                   className="absolute top-4 left-2"
-                  onClick={closeImage}>
+                  onClick={closeImage}
+                >
                   <HiOutlineXMark className="h-5 w-5" />
                 </Button>
                 <img
@@ -172,7 +174,8 @@ const ReplyTweetModel = ({ visible, onClose, tweet_id, tweet }) => {
                 <Button
                   color="gray"
                   className="rounded-full"
-                  onClick={() => uploadImage.current.click()}>
+                  onClick={() => uploadImage.current.click()}
+                >
                   <PiImage className="h-5 w-5" />
                 </Button>
                 <Button color="gray" className="rounded-full">
@@ -184,7 +187,8 @@ const ReplyTweetModel = ({ visible, onClose, tweet_id, tweet }) => {
               </div>
               <Button
                 disabled={tweetText.length === 0}
-                onClick={handlePostTweet}>
+                onClick={handlePostTweet}
+              >
                 Tweet
               </Button>
             </div>
