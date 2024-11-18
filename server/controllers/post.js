@@ -6,14 +6,13 @@ import { nanoid } from "nanoid";
 export const postTweet = async (req, res) => {
   try {
     const { content } = req.body;
-    console.log(req.body);
 
     const buffer = req.file?.buffer || null;
     let picture = null;
     if (buffer) {
       const ref = nanoid();
       await sharp(buffer)
-        .webp({ quality: 60})
+        .webp({ quality: 60 })
         .toFile(`public/assets/${ref}.webp`);
       picture = `${ref}.webp`;
     }
